@@ -543,14 +543,7 @@ decodeSchemaInternal =
         booleanSchemaDecoder : Decoder Json.Schema.Definitions.Schema
         booleanSchemaDecoder =
             Json.Decode.bool
-                |> Json.Decode.andThen
-                    (\b ->
-                        if b then
-                            Json.Decode.succeed (Json.Schema.Definitions.BooleanSchema True)
-
-                        else
-                            Json.Decode.succeed (Json.Schema.Definitions.BooleanSchema False)
-                    )
+                |> Json.Decode.map Json.Schema.Definitions.BooleanSchema
 
         exclusiveBoundaryDecoder : Decoder Json.Schema.Definitions.ExclusiveBoundary
         exclusiveBoundaryDecoder =
@@ -639,10 +632,7 @@ decodeSchemaInternal =
     Json.Decode.oneOf
         [ booleanSchemaDecoder
         , objectSchemaDecoder
-            |> Json.Decode.andThen
-                (\b ->
-                    Json.Decode.succeed (Json.Schema.Definitions.ObjectSchema b)
-                )
+            |> Json.Decode.map Json.Schema.Definitions.ObjectSchema
         ]
 
 
@@ -679,7 +669,7 @@ multipleTypesDecoder lst =
                 |> List.sort
                 |> List.map Json.Schema.Definitions.stringToType
                 |> foldResults
-                |> Result.andThen (Ok << Json.Schema.Definitions.UnionType)
+                |> Result.map Json.Schema.Definitions.UnionType
                 |> resultToDecoder
 
 
