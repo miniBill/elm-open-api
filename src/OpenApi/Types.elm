@@ -91,6 +91,7 @@ import Json.Decode.Extra
 import Json.Decode.Pipeline
 import Json.Encode exposing (Value)
 import Json.Schema.Definitions
+import Result.Extra
 
 
 
@@ -667,8 +668,7 @@ multipleTypesDecoder lst =
         otherList ->
             otherList
                 |> List.sort
-                |> List.map Json.Schema.Definitions.stringToType
-                |> foldResults
+                |> Result.Extra.combineMap Json.Schema.Definitions.stringToType
                 |> Result.map Json.Schema.Definitions.UnionType
                 |> resultToDecoder
 
@@ -698,15 +698,6 @@ failIfEmpty l =
 
     else
         Json.Decode.succeed l
-
-
-foldResults : List (Result x y) -> Result x (List y)
-foldResults results =
-    results
-        |> List.foldl
-            (\t -> Result.andThen (\r -> t |> Result.map (\a -> a :: r)))
-            (Ok [])
-        |> Result.map List.reverse
 
 
 resultToDecoder : Result String a -> Decoder a
